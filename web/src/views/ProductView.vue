@@ -1,6 +1,6 @@
 <template>
   <div style="padding: 20px;">
-    <h2>📦 商品大厅（项目名：myapp）</h2>
+    <h2>📦 商品大厅（MyApp）</h2>
     <div style="display: flex; gap: 20px;">
       <div style="width: 250px; border-right: 1px solid #ccc;">
         <h3>商品列表</h3>
@@ -26,11 +26,10 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router'; // 🌟 1. 引入路由
+import { useRouter } from 'vue-router'; // 🌟 引入路由
 import { request } from '../utils/api';
 
-const router = useRouter(); // 🌟 2. 初始化路由实例
-
+const router = useRouter();
 const productList = ref([]);
 const detail = ref(null);
 const buyMsg = ref('');
@@ -45,22 +44,21 @@ const fetchDetail = async (id) => {
 };
 
 const handlePurchase = async (productId) => {
-  // 🌟 3. 从 localStorage 检查用户手环（Token）是否存在
   const token = localStorage.getItem('token'); 
 
   if (!token) {
-    // 没登录：闪现到登录页，并用 query 把“商品ID”和“最终目的地”藏进 URL 里
+    // 未登录：携带商品 ID 与重定向小尾巴前往登录页
     router.push({
       path: '/login',
       query: { 
         productId: productId,
-        redirect: '/purchase' // 告诉登录页，待会登录完了去哪
+        redirect: '/purchase'
       }
     });
     return;
   }
 
-  // 已登录：直接带着商品ID，意气风发地飞向结算中心
+  // 已登录：直接带着商品 ID 顺畅前往结算页
   router.push({
     path: '/purchase',
     query: { productId: productId }

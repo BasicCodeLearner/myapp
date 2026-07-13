@@ -14,8 +14,7 @@
       <div class="actions">
         <button class="btn-cancel" @click="goBack">返回商品大厅</button>
         
-        <!-- 🌟 优化：根据不同状态切换按钮文字，且当 loading 或 paySuccess 为 true 时都禁用按钮 -->
-        <!-- 🌟 优化：通过 :class 当支付成功时追加 btn-success-disabled 样式 -->
+        <!-- 根据加载状态和成功状态动态控制文言，绑定专属禁用样式与属性 -->
         <button 
           :class="['btn-pay', { 'btn-success-disabled': paySuccess }]" 
           @click="handlePay" 
@@ -42,18 +41,17 @@ const productId = ref('');
 const loading = ref(false);
 const resultMsg = ref('');
 const isError = ref(false); 
-const paySuccess = ref(false); // 🌟 新增：标记是否成功完成支付
+const paySuccess = ref(false);
 
 onMounted(() => {
-  // 1. 防偷渡线：检查 URL 里到底有没有带商品 ID 过来
+  // 1.防偷渡第一线：如果直接手输地址且没带商品 ID，无情踢回首页
   const targetProductId = route.query.productId;
-  
   if (!targetProductId) {
     router.push('/');
     return;
   }
 
-  // 2. 安全防线：如果带了商品 ID，但发现没登录，照常踢去登录页
+  // 2.防偷渡第二线：带了商品 ID 但未登录，带齐参数踢去登录页
   const token = localStorage.getItem('token');
   if (!token) {
     router.push({
@@ -66,21 +64,19 @@ onMounted(() => {
     return;
   }
 
-  // 3. 只有既带了商品 ID、又登录成功的正规军，才允许留下并绑定数据
+  // 3.条件全部满足的正规军，才准许留下绑定数据
   productId.value = targetProductId;
 });
 
-// 返回商品大厅
 const goBack = () => {
   router.push('/'); 
 };
 
-// 点击支付
 const handlePay = async () => {
   loading.value = true; 
   resultMsg.value = ''; 
   isError.value = false; 
-  paySuccess.value = false; // 每次点击时重置成功状态
+  paySuccess.value = false; 
 
   try {
     const res = await request('/myapp/api/purchase/submit', { 
@@ -90,7 +86,7 @@ const handlePay = async () => {
 
     if (res && res.success) { 
       resultMsg.value = `🎉 恭喜！${res.message}`; 
-      paySuccess.value = true; // 🌟 核心：支付成功，激活不可逆转状态
+      paySuccess.value = true; // 🌟 核心：触发成功状态，令按钮变灰
     } else if (res) {
       isError.value = true;
       resultMsg.value = `❌ 支付失败：${res.message || '未知错误'}`;
@@ -179,7 +175,7 @@ button {
   background-color: #5daf34;
 } 
 button:disabled {
-  background-color: #c8e6c9; /* 正在加载时的绿色禁用色 */
+  background-color: #c8e6c9;
   cursor: not-allowed;
 } 
 .result-message {
@@ -191,16 +187,15 @@ button:disabled {
   border-radius: 4px;
   font-weight: bold;
 } 
-
 .result-message.is-error {
   background-color: #fef0f0;
   color: #f56c6c;
 }
 
-/* 🌟 新增：支付成功后，按钮被强制变灰的专属样式 */
+/* 支付完成后强制呈现的置灰、禁用样式 */
 .btn-pay.btn-success-disabled,
 .btn-pay.btn-success-disabled:hover {
-  background-color: #909399 !important; /* 沉稳的灰色 */
+  background-color: #909399 !important;
   color: #ffffff !important;
   cursor: not-allowed;
 }
