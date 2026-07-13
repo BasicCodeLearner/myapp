@@ -10,7 +10,11 @@
 
 <script setup>
 import { ref } from 'vue';
+import { useRouter, useRoute } from 'vue-router'; // 🌟 1. 引入 Vue Router 的核心组合式 API
 import { request } from '../utils/api';
+
+const router = useRouter(); // 🌟 用于控制跳转动作
+const route = useRoute();   // 🌟 用于读取当前 URL 中的参数
 
 const username = ref('');
 const password = ref('');
@@ -26,10 +30,20 @@ const login = async () => {
   if (res && res.success) {
     localStorage.setItem('token', res.token);
     
-    // 🌟 顺着小尾巴原路返回
-    const urlParams = new URLSearchParams(window.location.search);
-    const redirectUrl = urlParams.get('redirect');
-    window.location.href = redirectUrl ? redirectUrl : '/myapp/';
+    // 🌟 2. 优雅地通过 Vue Router 获取传过来的参数（省去了复杂的原生 URL 解析）
+    const redirectPath = route.query.redirect; // 拿到 '/purchase'
+    const productId = route.query.productId;   // 拿到商品 ID
+    
+    if (redirectPath) {
+      // 🟢 如果有指定目的地，使用 router.push 进行页面无刷新跳转，并把商品ID带过去
+      router.push({
+        path: redirectPath,
+        query: productId ? { productId } : {} // 最终会跳到 /purchase?productId=xxx
+      });
+    } else {
+      // 🔵 如果是单纯点进登录页面的，登录成功后直接返回商品大厅首页
+      router.push('/');
+    }
   } else if (res) {
     errMsg.value = res.message;
   }

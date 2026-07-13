@@ -26,7 +26,10 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router'; // 🌟 1. 引入路由
 import { request } from '../utils/api';
+
+const router = useRouter(); // 🌟 2. 初始化路由实例
 
 const productList = ref([]);
 const detail = ref(null);
@@ -42,13 +45,25 @@ const fetchDetail = async (id) => {
 };
 
 const handlePurchase = async (productId) => {
-  // 调用购买微服务 (指向端口 3002)
-  const res = await request('/myapp/api/purchase/submit', {
-    method: 'POST',
-    body: JSON.stringify({ productId })
-  });
-  if (res && res.success) {
-    buyMsg.value = res.message;
+  // 🌟 3. 从 localStorage 检查用户手环（Token）是否存在
+  const token = localStorage.getItem('token'); 
+
+  if (!token) {
+    // 没登录：闪现到登录页，并用 query 把“商品ID”和“最终目的地”藏进 URL 里
+    router.push({
+      path: '/login',
+      query: { 
+        productId: productId,
+        redirect: '/purchase' // 告诉登录页，待会登录完了去哪
+      }
+    });
+    return;
   }
+
+  // 已登录：直接带着商品ID，意气风发地飞向结算中心
+  router.push({
+    path: '/purchase',
+    query: { productId: productId }
+  });
 };
 </script>
