@@ -1,4 +1,4 @@
-import express = require('express');
+import express from 'express';
 
 import type { Request, Response } from 'express';
 
@@ -6,7 +6,7 @@ const app = express();
 
 app.use(express.json());
 
-// 📐 定义商品数据结构的契约（对账单）
+// 定义商品数据结构的契约
 interface Product {
     id: number;
     name: string;
