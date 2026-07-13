@@ -1,4 +1,10 @@
 <template>
+  <nav>
+      <!-- 必须用 router-link，地址栏才会变 -->
+      <router-link to="/">商品大厅</router-link> | 
+      <router-link to="/login">登录</router-link> | 
+      <router-link to="/purchase">结算</router-link>
+  </nav>
   <RouterView />
 </template>
 
